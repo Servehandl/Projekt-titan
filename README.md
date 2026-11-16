@@ -28,4 +28,4 @@ $env:TITAN_PROJECT_ROOT = "C:\Pfad\zu\deinem\GIANTS-Projekt"
 uv run titan-mcp
 ~~~
 
-Der Server stellt die schreibgeschützten MCP-Werkzeuge `list_i3d_files`, `inspect_i3d`, `search_i3d_nodes` und `check_i3d_integrity` über stdio bereit. `search_i3d_nodes` findet Knoten projektweit anhand ihres Namens oder ihrer `nodeId`. Angefragte Dateien dürfen nicht außerhalb von `TITAN_PROJECT_ROOT` liegen.
+Der Server stellt die schreibgeschützten MCP-Werkzeuge `list_i3d_files`, `inspect_i3d`, `search_i3d_nodes`, `inspect_i3d_node` und `check_i3d_integrity` über stdio bereit. `search_i3d_nodes` findet Knoten projektweit anhand ihres Namens oder ihrer `nodeId`. `inspect_i3d_node` liefert zu einer `nodeId` die XML-Attribute, die rohe lokale Translation/Rotation/Scale, den Knotenpfad und direkte Kinder. Angefragte Dateien dürfen nicht außerhalb von `TITAN_PROJECT_ROOT` liegen.
