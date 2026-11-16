@@ -24,7 +24,7 @@ Im Projektordner:
 
 ```powershell
 uv sync
-$env:TITAN_PROJECT_ROOT = "C:\\Pfad\\zu\\deinem\\GIANTS-Projekt"
+$env:TITAN_PROJECT_ROOT = "C:\Pfad\zu\deinem\GIANTS-Projekt"
 uv run titan-mcp
 ```
 
