@@ -19,14 +19,14 @@ Der Prototyp liest deshalb die Scene-Knoten und File-Verweise direkt aus der I3D
 
 Die geprüften Quellen dokumentieren eine interaktive Lua-Script-Konsole sowie eine Debugger-Verbindung über die offizielle VS-Code-Erweiterung. Sie dokumentieren jedoch keine allgemeine externe API, über die ein eigener Prozess beliebige Aktionen im Editor ausführen kann. Das ist eine Aussage über die geprüften Dokumente, kein Beweis, dass es keine undokumentierten oder versionsspezifischen Wege gibt.
 
-PROJECT TITAN startet daher mit lokalen, schreibgeschützten MCP-Werkzeugen für Projektdateien. Eine Live-Verbindung zum Editor bleibt offen, bis sich ein stabiler und unterstützter Integrationsweg belegen lässt.
+PROJECT TITAN bietet lokale, schreibgeschützte MCP-Werkzeuge für Projektdateien. Zusätzlich enthält es einen manuellen Einweg-Snapshot: Ein GIANTS-Editor-Lua-Skript liest die aktuelle Auswahl und speichert sie mit den GIANTS-XML-Funktionen als XML-Datei im Projektordner. Das MCP liest diese Datei. Die Übergabe muss nach jeder neuen Auswahl manuell erneut ausgelöst werden; sie ist keine automatische Live-Verbindung und steuert den Editor nicht.
 
 ## Prototyp
 
 - MCP-Transport: lokales **stdio**
 - Laufzeit: Python 3.11+
 - Werkzeuge: I3D-Dateien finden, Scene-Knoten und Dateiverweise zusammenfassen, Scene-Knoten projektweit nach Name oder `nodeId` suchen, einzelne Knoten samt XML-Attributen und Hierarchie inspizieren sowie häufige ID-Referenzen und fehlende lokale Dateien prüfen
-- Schreibzugriffe und Editor-Steuerung: zunächst nicht enthalten
+- I3D-Schreibzugriffe und Editor-Steuerung: nicht enthalten; nur der manuell ausgelöste Snapshot schreibt eine separate XML-Datei
 - Sicherheitsgrenze: angefragte Dateien müssen innerhalb von `TITAN_PROJECT_ROOT` liegen
 
 ## Quellen
@@ -34,5 +34,6 @@ PROJECT TITAN startet daher mit lokalen, schreibgeschützten MCP-Werkzeugen für
 - [GIANTS Editor documentation](https://gdn.giants-software.com/editor.php) — Script-Fenster und Editor-Funktionen
 - [GIANTS Farming Simulator IDE Support for VS Code](https://gdn.giants-software.com/vscode.php) — Verbindung des Editors und Debugger-Funktionen
 - [GIANTS IDE Support on Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=GIANTSSoftware.farmingsimulator-ide) — Debugger-Funktionen und TCP-Einstellungen
-- [GIANTS I3D format documentation](https://gdn.giants-software.com/documentation_print.php?category=121033&version=engine) — XML-Aufbau, Files und Scenegraph
+- [GIANTS I3D format documentation](https://gdn.giants-software.com/documentation_i3d.php) — XML-Aufbau, Files und Scenegraph
+- [GIANTS FS25 XML scripting documentation](https://gdn.giants-software.com/documentation_scripting_fs25.php?category=33&function=884&version=engine) — XML-Dateien mit `createXMLFile`, `setXML*` und `saveXMLFile` schreiben
 - [Official MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk) — Python SDK, MCPServer und stdio
