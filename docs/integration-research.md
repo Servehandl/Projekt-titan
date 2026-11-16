@@ -19,7 +19,7 @@ Der Prototyp liest deshalb die Scene-Knoten und File-Verweise direkt aus der I3D
 
 Die geprüften Quellen dokumentieren eine interaktive Lua-Script-Konsole sowie eine Debugger-Verbindung über die offizielle VS-Code-Erweiterung. Sie dokumentieren jedoch keine allgemeine externe API, über die ein eigener Prozess beliebige Aktionen im Editor ausführen kann. Das ist eine Aussage über die geprüften Dokumente, kein Beweis, dass es keine undokumentierten oder versionsspezifischen Wege gibt.
 
-PROJECT TITAN bietet lokale, schreibgeschützte MCP-Werkzeuge für Projektdateien. Zusätzlich enthält es einen manuellen Einweg-Snapshot: Ein GIANTS-Editor-Lua-Skript liest die aktuelle Auswahl und speichert sie mit den GIANTS-XML-Funktionen als XML-Datei im Projektordner. Das MCP liest diese Datei. Die Übergabe muss nach jeder neuen Auswahl manuell erneut ausgelöst werden; sie ist keine automatische Live-Verbindung und steuert den Editor nicht.
+PROJECT TITAN bietet lokale, schreibgeschützte MCP-Werkzeuge für Projektdateien. Zusätzlich enthält es einen manuellen Einweg-Snapshot: Ein GIANTS-Editor-Lua-Skript liest die aktuelle Auswahl und speichert sie mit den GIANTS-XML-Funktionen als XML-Datei im Projektordner. Das MCP liest diese Datei. Die Übergabe muss nach jeder neuen Auswahl manuell erneut ausgelöst werden; sie ist keine automatische Live-Verbindung und steuert den Editor nicht. Die Helper-Datei nutzt die GIANTS-XML-Funktionen statt Lua-Standard-I/O, das in GDN-Skriptbeispielen als sicherheitsbeschränkt beschrieben wird.
 
 ## Prototyp
 
@@ -36,4 +36,5 @@ PROJECT TITAN bietet lokale, schreibgeschützte MCP-Werkzeuge für Projektdateie
 - [GIANTS IDE Support on Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=GIANTSSoftware.farmingsimulator-ide) — Debugger-Funktionen und TCP-Einstellungen
 - [GIANTS I3D format documentation](https://gdn.giants-software.com/documentation_i3d.php) — XML-Aufbau, Files und Scenegraph
 - [GIANTS FS25 XML scripting documentation](https://gdn.giants-software.com/documentation_scripting_fs25.php?category=33&function=884&version=engine) — XML-Dateien mit `createXMLFile`, `setXML*` und `saveXMLFile` schreiben
+- [GIANTS GDN forum: script file access](https://gdn.giants-software.com/thread.php?categoryId=3&threadId=6181) — Standard-I/O ist im GIANTS-Lua-Sandbox-Kontext eingeschränkt
 - [Official MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk) — Python SDK, MCPServer und stdio
