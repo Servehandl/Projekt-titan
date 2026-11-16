@@ -41,6 +41,20 @@ Codex CLI und Codex IDE verwenden dieselbe MCP-Konfiguration. Wenn Codex beim Re
 - `search_i3d_nodes`: Scene-Knoten in allen I3D-Dateien nach Name oder `nodeId` suchen
 - `inspect_i3d_node`: einen Knoten samt rohen XML-Attributen, Hierarchie und direkten Kindern ausgeben
 - `check_i3d_integrity`: häufige ID-Fehler und fehlende lokale Dateiverweise prüfen
+- `read_editor_selection_snapshot`: den letzten manuellen Auswahl-Snapshot aus dem GIANTS Editor lesen
+
+
+## Aktuelle Auswahl aus dem GIANTS Editor übergeben
+
+Der Editor-Snapshot ist ein manueller Einweg-Schritt. Er ändert keine I3D-Datei.
+
+1. Öffne `scripts/giants_editor/export_selection.lua` aus dem Repository.
+2. Ändere oben in `outputPath` den Beispielpfad auf `.project-titan-editor-selection.xml` direkt im Ordner, den du als `TITAN_PROJECT_ROOT` eingetragen hast.
+3. Öffne das Skript im GIANTS Editor und führe es über den Script Editor aus.
+4. Rufe in Codex das Werkzeug `read_editor_selection_snapshot` auf. Es liefert Name, Parent, lokale und globale Position, Rotation, Skalierung und Kinderzahl der ausgewählten Knoten.
+5. Nach einer neuen Auswahl das Skript erneut ausführen, damit der Snapshot aktualisiert wird.
+
+Das Skript exportiert höchstens 500 ausgewählte Knoten. Der Snapshot enthält GIANTS-Laufzeit-IDs; diese sind keine `nodeId`-Werte aus der I3D-Datei. Die XML-Datei bleibt innerhalb des konfigurierten Projektordners und ist in `.gitignore` eingetragen. Die Übergabe ist nicht automatisch; der Editor wird nicht per TCP fernbedient.
 
 ## Grenzen
 
