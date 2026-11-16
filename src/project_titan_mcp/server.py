@@ -136,6 +136,82 @@ def inspect_i3d(relative_path: str, max_elements: int = 100) -> dict[str, Any]:
 
 
 @mcp.tool()
+def search_i3d_nodes(query: str, max_results: int = 100) -> dict[str, Any]:
+    """Search node names and IDs across I3D scene graphs without modifying files."""
+    search_term = query.strip()
+    if not search_term:
+        raise ValueError("query must not be empty.")
+    if max_results < 1 or max_results > 500:
+        raise ValueError("max_results must be between 1 and 500.")
+
+    root = _project_root()
+    normalized_query = search_term.casefold()
+    results: list[dict[str, str | None]] = []
+    match_count = 0
+    scanned_file_count = 0
+    parse_error_count = 0
+
+    for candidate in root.rglob("*"):
+        try:
+            if candidate.suffix.casefold() != ".i3d":
+                continue
+
+            file_path = candidate.resolve(strict=True)
+            file_path.relative_to(root)
+            if not file_path.is_file():
+                continue
+
+            scanned_file_count += 1
+            xml_root = ET.parse(file_path).getroot()
+            scene = xml_root.find("Scene")
+            if scene is None:
+                continue
+
+            stack: list[tuple[ET.Element, str | None]] = [(scene, None)]
+            while stack:
+                parent, parent_node_id = stack.pop()
+                for element in reversed(list(parent)):
+                    node_id = element.get("nodeId")
+                    name = element.get("name")
+                    searchable_values = (name or "", node_id or "")
+                    if node_id is not None and any(
+                        normalized_query in value.casefold()
+                        for value in searchable_values
+                    ):
+                        match_count += 1
+                        if len(results) < max_results:
+                            results.append(
+                                {
+                                    "relative_path": file_path.relative_to(root).as_posix(),
+                                    "tag": element.tag,
+                                    "name": name,
+                                    "node_id": node_id,
+                                    "parent_node_id": parent_node_id,
+                                }
+                            )
+                    stack.append(
+                        (
+                            element,
+                            node_id if node_id is not None else parent_node_id,
+                        )
+                    )
+        except ET.ParseError:
+            parse_error_count += 1
+        except (OSError, ValueError):
+            continue
+
+    return {
+        "query": search_term,
+        "project_root": str(root),
+        "scanned_i3d_file_count": scanned_file_count,
+        "match_count": match_count,
+        "results": results,
+        "results_truncated": match_count > len(results),
+        "parse_error_count": parse_error_count,
+    }
+
+
+@mcp.tool()
 def check_i3d_integrity(relative_path: str, max_issues: int = 100) -> dict[str, Any]:
     """Check common I3D ID references without changing the file or checking the full GDN schema."""
     if max_issues < 1 or max_issues > 500:
