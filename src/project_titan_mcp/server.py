@@ -6,6 +6,12 @@ from pathlib import Path
 from typing import Any
 
 from mcp.server import MCPServer
+from .editor_bridge import (
+    get_editor_status as _get_editor_status,
+    read_live_editor_selection as _read_live_editor_selection,
+    select_live_editor_i3d_node as _select_live_editor_i3d_node,
+    set_live_editor_selection_transform as _set_live_editor_selection_transform,
+)
 
 mcp = MCPServer("project-titan")
 
@@ -396,6 +402,76 @@ def read_editor_selection_snapshot() -> dict[str, Any]:
 
 
 @mcp.tool()
+def get_live_editor_status() -> dict[str, Any]:
+    """Check whether the local GIANTS Editor bridge is running and which project scene is open."""
+    return _get_editor_status(_project_root())
+
+
+@mcp.tool()
+def read_live_editor_selection() -> dict[str, Any]:
+    """Read the current GIANTS Editor selection over the local live bridge."""
+    return _read_live_editor_selection(_project_root())
+
+
+def _i3d_node_name_path(file_path: Path, node_id: str) -> list[str]:
+    xml_root = ET.parse(file_path).getroot()
+    scene = xml_root.find("Scene")
+    if scene is None:
+        raise ValueError("The I3D file has no Scene section.")
+
+    matches: list[list[str]] = []
+    stack: list[tuple[ET.Element, list[str]]] = [(scene, [])]
+    while stack:
+        parent, ancestor_names = stack.pop()
+        for element in reversed(list(parent)):
+            current_names = ancestor_names
+            current_id = element.get("nodeId")
+            if current_id is not None:
+                current_names = ancestor_names + [element.get("name", "")]
+                if current_id == node_id:
+                    matches.append(current_names)
+            stack.append((element, current_names))
+
+    if not matches:
+        raise ValueError(f"No I3D scene node has nodeId {node_id!r}.")
+    if len(matches) > 1:
+        raise ValueError(f"I3D nodeId {node_id!r} appears more than once in the file.")
+    if any(name == "" for name in matches[0]):
+        raise ValueError("The selected I3D node has an unnamed parent and cannot be resolved safely.")
+    return matches[0]
+
+
+@mcp.tool()
+def select_live_editor_i3d_node(relative_path: str, node_id: str) -> dict[str, Any]:
+    """Select an I3D node in the currently open Editor scene by its I3D nodeId."""
+    requested_id = node_id.strip()
+    if not requested_id:
+        raise ValueError("node_id must not be empty.")
+
+    root = _project_root()
+    file_path = _resolve_i3d_file(relative_path, root)
+    name_path = _i3d_node_name_path(file_path, requested_id)
+    return _select_live_editor_i3d_node(root, file_path, name_path)
+
+
+@mcp.tool()
+def set_live_editor_selection_transform(
+    expected_runtime_ids: list[int],
+    translation: list[float] | None = None,
+    rotation_radians: list[float] | None = None,
+    scale: list[float] | None = None,
+) -> dict[str, Any]:
+    """Set absolute local transforms on the current selection after confirming its runtime IDs."""
+    return _set_live_editor_selection_transform(
+        project_root=_project_root(),
+        expected_runtime_ids=expected_runtime_ids,
+        translation=translation,
+        rotation=rotation_radians,
+        scale=scale,
+    )
+
+
+@mcp.tool()
 def check_i3d_integrity(relative_path: str, max_issues: int = 100) -> dict[str, Any]:
     """Check common I3D ID references without changing the file or checking the full GDN schema."""
     if max_issues < 1 or max_issues > 500:
@@ -539,3 +615,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

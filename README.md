@@ -8,9 +8,9 @@ PROJECT TITAN soll MCP-Clients wie Codex kontrollierte Werkzeuge für GIANTS-Edi
 
 ## Aktueller Stand
 
-Der erste Prototyp ist ein lokaler, schreibgeschützter MCP-Server. Er kann `.i3d`-Dateien in einem konfigurierten Projektordner finden, Scene-Knoten und Datei-Verweise zusammenfassen und häufige ID-Referenzfehler und fehlende lokale I3D-Dateiverweise melden. Für die aktuelle Auswahl gibt es zusätzlich einen manuell auszuführenden GIANTS-Editor-Snapshot. Der MCP liest die exportierte XML-Datei; eine automatische oder kontinuierliche Live-Steuerung ist nicht enthalten.
+PROJECT TITAN bietet lokale MCP-Werkzeuge zum Lesen von `.i3d`-Dateien sowie einen experimentellen Live-Bridge-Prototyp für den GIANTS Editor. Das Editor-Skript tauscht strukturierte XML-Nachrichten über einen Ordner in `%LOCALAPPDATA%` mit dem MCP aus. Es kann die aktuelle Auswahl lesen, einen Knoten anhand seiner I3D-`nodeId` in der geöffneten Szene auswählen und absolute lokale Translation, Rotation und Scale auf die danach bestätigte Auswahl anwenden. Das Skript führt keinen beliebigen Lua-Code aus. Änderungen bleiben zunächst in der geöffneten Editor-Szene; gespeichert wird mit **Strg+S** im Editor.
 
-Die offizielle GIANTS-Dokumentation beschreibt ein Editor-Script-Fenster sowie Debugger-Verbindungen über die GIANTS-VS-Code-Erweiterung. Die Recherche und die offenen Integrationsfragen stehen in [docs/integration-research.md](docs/integration-research.md). Hinweise zur Verbindung mit Codex stehen in [docs/codex-setup.md](docs/codex-setup.md).
+Für die Live-Verbindung muss `scripts/giants_editor/project_titan_live_bridge.lua` im Editor-Nutzerskriptordner liegen und `TITAN_EDITOR_BRIDGE_DIR` auf den passenden AppData-Unterordner zeigen. Die Einrichtung steht in [docs/codex-setup.md](docs/codex-setup.md). Grenzen und untersuchte Verbindungswege stehen in [docs/integration-research.md](docs/integration-research.md).
 
 ## Voraussetzungen
 
@@ -28,4 +28,5 @@ $env:TITAN_PROJECT_ROOT = "C:\Pfad\zu\deinem\GIANTS-Projekt"
 uv run titan-mcp
 ~~~
 
-Der Server stellt die schreibgeschützten MCP-Werkzeuge `list_i3d_files`, `inspect_i3d`, `search_i3d_nodes`, `inspect_i3d_node`, `check_i3d_integrity` und `read_editor_selection_snapshot` über stdio bereit. `search_i3d_nodes` findet Knoten projektweit anhand ihres Namens oder ihrer `nodeId`. `inspect_i3d_node` liefert zu einer `nodeId` die XML-Attribute, die rohe lokale Translation/Rotation/Scale, den Knotenpfad und direkte Kinder. `read_editor_selection_snapshot` liest den zuletzt manuell exportierten Zustand der aktuellen Editor-Auswahl. Angefragte Dateien dürfen nicht außerhalb von `TITAN_PROJECT_ROOT` liegen.
+Der Server stellt über stdio Werkzeuge zum Lesen und zur kontrollierten Live-Steuerung bereit. `search_i3d_nodes` findet Knoten projektweit anhand ihres Namens oder ihrer `nodeId`. `inspect_i3d_node` liefert XML-Attribute, rohe lokale Translation/Rotation/Scale, Knotenpfad und direkte Kinder. `get_live_editor_status` und `read_live_editor_selection` fragen den laufenden Editor ab. `set_live_editor_selection_transform` ändert nur die Auswahl, deren Laufzeit-IDs unmittelbar vorher bestätigt wurden. Live-Abfragen und Änderungen sind auf Szenen innerhalb von `TITAN_PROJECT_ROOT` beschränkt. Angefragte I3D-Dateien müssen ebenfalls innerhalb dieses Projektordners liegen.
+
