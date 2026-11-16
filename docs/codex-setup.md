@@ -34,7 +34,7 @@ Prüfe die Registrierung:
 codex mcp list
 ```
 
-Codex CLI und Codex IDE verwenden dieselbe MCP-Konfiguration. Wenn Codex beim Registrieren bereits geöffnet war, lade es neu. Danach sollte der Server mit den fünf Werkzeugen unter den MCP-Werkzeugen verfügbar sein:
+Codex CLI und Codex IDE verwenden dieselbe MCP-Konfiguration. Wenn Codex beim Registrieren bereits geöffnet war, lade es neu. Danach sollte der Server mit den sechs Werkzeugen unter den MCP-Werkzeugen verfügbar sein:
 
 - `list_i3d_files`: I3D-Dateien im Projekt finden
 - `inspect_i3d`: Scene-Knoten und Dateiverweise einer I3D-Datei zusammenfassen
