@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "project-titan-mcp"
+version = "0.1.0"
+description = "Local read-only MCP tools for GIANTS Editor project files"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "mcp>=2.0,<3",
+]
+
+[project.scripts]
+titan-mcp = "project_titan_mcp.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/project_titan_mcp"]
