@@ -75,7 +75,7 @@ def list_i3d_files(limit: int = 100) -> dict[str, Any]:
 
 @mcp.tool()
 def inspect_i3d(relative_path: str, max_elements: int = 100) -> dict[str, Any]:
-    """Read the XML summary of one .i3d file inside TITAN_PROJECT_ROOT."""
+    """Read the scene nodes and file references from one .i3d file."""
     if max_elements < 1 or max_elements > 500:
         raise ValueError("max_elements must be between 1 and 500.")
 
@@ -83,29 +83,55 @@ def inspect_i3d(relative_path: str, max_elements: int = 100) -> dict[str, Any]:
     file_path = _resolve_i3d_file(relative_path, root)
     xml_root = ET.parse(file_path).getroot()
     scene = xml_root.find("Scene")
+    files_section = xml_root.find("Files")
 
-    elements: list[dict[str, str | None]] = []
+    nodes: list[dict[str, str | None]] = []
+
+    def collect_nodes(parent: ET.Element, parent_node_id: str | None = None) -> None:
+        for element in parent:
+            node_id = element.get("nodeId")
+            if node_id is not None:
+                nodes.append(
+                    {
+                        "tag": element.tag,
+                        "name": element.get("name"),
+                        "node_id": node_id,
+                        "parent_node_id": parent_node_id,
+                        "shape_id": element.get("shapeId"),
+                        "material_ids": element.get("materialIds"),
+                    }
+                )
+            collect_nodes(
+                element,
+                node_id if node_id is not None else parent_node_id,
+            )
+
     if scene is not None:
-        for element in scene.iter():
-            element_id = element.get("id")
-            name = element.get("name")
-            if element_id is None and name is None:
-                continue
-            elements.append(
+        collect_nodes(scene)
+
+    file_references: list[dict[str, str | None]] = []
+    if files_section is not None:
+        for entry in files_section.findall("File"):
+            file_references.append(
                 {
-                    "tag": element.tag,
-                    "name": name,
-                    "id": element_id,
+                    "file_id": entry.get("fileId"),
+                    "filename": entry.get("filename"),
+                    "relative_path": entry.get("relativePath"),
                 }
             )
 
     return {
         "relative_path": file_path.relative_to(root).as_posix(),
+        "i3d_name": xml_root.get("name"),
         "i3d_version": xml_root.get("version"),
+        "sections": [element.tag for element in xml_root],
         "scene_present": scene is not None,
-        "scene_element_count": len(elements),
-        "elements": elements[:max_elements],
-        "truncated": len(elements) > max_elements,
+        "scene_node_count": len(nodes),
+        "nodes": nodes[:max_elements],
+        "nodes_truncated": len(nodes) > max_elements,
+        "file_reference_count": len(file_references),
+        "file_references": file_references[:max_elements],
+        "file_references_truncated": len(file_references) > max_elements,
     }
 
 
