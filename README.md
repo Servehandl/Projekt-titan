@@ -8,7 +8,7 @@ PROJECT TITAN soll MCP-Clients wie Codex kontrollierte Werkzeuge für GIANTS-Edi
 
 ## Aktueller Stand
 
-Der erste Prototyp ist ein lokaler, schreibgeschützter MCP-Server. Er kann `.i3d`-Dateien in einem konfigurierten Projektordner finden und ihre XML-Struktur zusammenfassen. Eine Live-Steuerung des Editors wird erst ergänzt, wenn ein stabiler Integrationsweg feststeht.
+Der erste Prototyp ist ein lokaler, schreibgeschützter MCP-Server. Er kann `.i3d`-Dateien in einem konfigurierten Projektordner finden, Scene-Knoten und Datei-Verweise zusammenfassen und häufige ID-Referenzfehler melden. Eine Live-Steuerung des Editors wird erst ergänzt, wenn ein stabiler Integrationsweg feststeht.
 
 Die offizielle GIANTS-Dokumentation beschreibt ein Editor-Script-Fenster sowie Debugger-Verbindungen über die GIANTS-VS-Code-Erweiterung. Die Recherche und die offenen Integrationsfragen stehen in [docs/integration-research.md](docs/integration-research.md). Hinweise zur Verbindung mit Codex stehen in [docs/codex-setup.md](docs/codex-setup.md).
 
@@ -22,10 +22,10 @@ Die offizielle GIANTS-Dokumentation beschreibt ein Editor-Script-Fenster sowie D
 
 Im Projektordner:
 
-```powershell
+~~~powershell
 uv sync
 $env:TITAN_PROJECT_ROOT = "C:\Pfad\zu\deinem\GIANTS-Projekt"
 uv run titan-mcp
-```
+~~~
 
-Der Server stellt die schreibgeschützten MCP-Werkzeuge `list_i3d_files` und `inspect_i3d` über stdio bereit. Angefragte Dateien dürfen nicht außerhalb von `TITAN_PROJECT_ROOT` liegen.
+Der Server stellt die schreibgeschützten MCP-Werkzeuge `list_i3d_files`, `inspect_i3d` und `check_i3d_integrity` über stdio bereit. Angefragte Dateien dürfen nicht außerhalb von `TITAN_PROJECT_ROOT` liegen.
