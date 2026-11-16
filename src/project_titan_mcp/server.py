@@ -212,6 +212,96 @@ def search_i3d_nodes(query: str, max_results: int = 100) -> dict[str, Any]:
 
 
 @mcp.tool()
+def inspect_i3d_node(
+    relative_path: str,
+    node_id: str,
+    max_matches: int = 20,
+    max_children: int = 100,
+) -> dict[str, Any]:
+    """Inspect one I3D node by exact nodeId, including raw transforms and hierarchy."""
+    requested_id = node_id.strip()
+    if not requested_id:
+        raise ValueError("node_id must not be empty.")
+    if max_matches < 1 or max_matches > 100:
+        raise ValueError("max_matches must be between 1 and 100.")
+    if max_children < 1 or max_children > 500:
+        raise ValueError("max_children must be between 1 and 500.")
+
+    root = _project_root()
+    file_path = _resolve_i3d_file(relative_path, root)
+    xml_root = ET.parse(file_path).getroot()
+    scene = xml_root.find("Scene")
+    if scene is None:
+        raise ValueError("The I3D file has no Scene section.")
+
+    matches: list[dict[str, Any]] = []
+    match_count = 0
+    stack: list[
+        tuple[ET.Element, str | None, list[dict[str, str | None]]]
+    ] = [(scene, None, [])]
+
+    while stack:
+        parent, parent_node_id, ancestor_path = stack.pop()
+        for element in reversed(list(parent)):
+            current_id = element.get("nodeId")
+            current_name = element.get("name")
+            current_path = ancestor_path
+            if current_id is not None:
+                current_path = ancestor_path + [
+                    {
+                        "tag": element.tag,
+                        "name": current_name,
+                        "node_id": current_id,
+                    }
+                ]
+
+            if current_id == requested_id:
+                match_count += 1
+                if len(matches) < max_matches:
+                    children = [
+                        {
+                            "tag": child.tag,
+                            "name": child.get("name"),
+                            "node_id": child.get("nodeId"),
+                        }
+                        for child in list(element)
+                    ]
+                    matches.append(
+                        {
+                            "tag": element.tag,
+                            "name": current_name,
+                            "node_id": current_id,
+                            "parent_node_id": parent_node_id,
+                            "path": current_path,
+                            "attributes": dict(element.attrib),
+                            "children": children[:max_children],
+                            "children_truncated": len(children) > max_children,
+                        }
+                    )
+
+            stack.append(
+                (
+                    element,
+                    current_id if current_id is not None else parent_node_id,
+                    current_path,
+                )
+            )
+
+    return {
+        "relative_path": file_path.relative_to(root).as_posix(),
+        "requested_node_id": requested_id,
+        "found": match_count > 0,
+        "match_count": match_count,
+        "matches": matches,
+        "matches_truncated": match_count > len(matches),
+        "transform_note": (
+            "Translation, rotation, and scale are returned as raw XML attributes; "
+            "no world-space transform is calculated."
+        ),
+    }
+
+
+@mcp.tool()
 def check_i3d_integrity(relative_path: str, max_issues: int = 100) -> dict[str, Any]:
     """Check common I3D ID references without changing the file or checking the full GDN schema."""
     if max_issues < 1 or max_issues > 500:
