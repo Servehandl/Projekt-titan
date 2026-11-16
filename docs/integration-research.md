@@ -25,7 +25,7 @@ PROJECT TITAN startet daher mit lokalen, schreibgeschützten MCP-Werkzeugen für
 
 - MCP-Transport: lokales **stdio**
 - Laufzeit: Python 3.11+
-- Werkzeuge: I3D-Dateien finden, Scene-Knoten und Dateiverweise zusammenfassen sowie häufige ID-Referenzen prüfen
+- Werkzeuge: I3D-Dateien finden, Scene-Knoten und Dateiverweise zusammenfassen, Scene-Knoten projektweit nach Name oder `nodeId` suchen sowie häufige ID-Referenzen prüfen
 - Schreibzugriffe und Editor-Steuerung: zunächst nicht enthalten
 - Sicherheitsgrenze: angefragte Dateien müssen innerhalb von `TITAN_PROJECT_ROOT` liegen
 
