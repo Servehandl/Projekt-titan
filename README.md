@@ -8,7 +8,7 @@ PROJECT TITAN soll MCP-Clients wie Codex kontrollierte Werkzeuge für GIANTS-Edi
 
 ## Aktueller Stand
 
-Der erste Prototyp ist ein lokaler, schreibgeschützter MCP-Server. Er kann `.i3d`-Dateien in einem konfigurierten Projektordner finden, Scene-Knoten und Datei-Verweise zusammenfassen und häufige ID-Referenzfehler melden. Eine Live-Steuerung des Editors wird erst ergänzt, wenn ein stabiler Integrationsweg feststeht.
+Der erste Prototyp ist ein lokaler, schreibgeschützter MCP-Server. Er kann `.i3d`-Dateien in einem konfigurierten Projektordner finden, Scene-Knoten und Datei-Verweise zusammenfassen und häufige ID-Referenzfehler und fehlende lokale I3D-Dateiverweise melden. Eine Live-Steuerung des Editors wird erst ergänzt, wenn ein stabiler Integrationsweg feststeht.
 
 Die offizielle GIANTS-Dokumentation beschreibt ein Editor-Script-Fenster sowie Debugger-Verbindungen über die GIANTS-VS-Code-Erweiterung. Die Recherche und die offenen Integrationsfragen stehen in [docs/integration-research.md](docs/integration-research.md). Hinweise zur Verbindung mit Codex stehen in [docs/codex-setup.md](docs/codex-setup.md).
 
