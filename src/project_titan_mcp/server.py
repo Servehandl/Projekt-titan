@@ -355,14 +355,14 @@ def check_i3d_integrity(relative_path: str, max_issues: int = 100) -> dict[str, 
             if not filename:
                 add_issue("missing_filename", "A File entry has no filename.", file_id or "")
 
-            normalized_filename = (filename or "").replace("\\\\", "/")
+            normalized_filename = (filename or "").replace("\\", "/")
             if (
                 filename
                 and (entry.get("relativePath") or "").casefold() == "true"
                 and not normalized_filename.startswith("$")
             ):
                 local_file_reference_count += 1
-                referenced_path = (file_path.parent / filename).resolve()
+                referenced_path = (file_path.parent / normalized_filename).resolve()
                 try:
                     referenced_path.relative_to(root)
                 except ValueError:
