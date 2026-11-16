@@ -317,6 +317,7 @@ def check_i3d_integrity(relative_path: str, max_issues: int = 100) -> dict[str, 
 
     issues: list[dict[str, str]] = []
     issue_count = 0
+    local_file_reference_count = 0
 
     def add_issue(code: str, message: str, value: str = "") -> None:
         nonlocal issue_count
@@ -353,6 +354,30 @@ def check_i3d_integrity(relative_path: str, max_issues: int = 100) -> dict[str, 
                 file_ids.add(file_id)
             if not filename:
                 add_issue("missing_filename", "A File entry has no filename.", file_id or "")
+
+            normalized_filename = (filename or "").replace("\\\\", "/")
+            if (
+                filename
+                and (entry.get("relativePath") or "").casefold() == "true"
+                and not normalized_filename.startswith("$")
+            ):
+                local_file_reference_count += 1
+                referenced_path = (file_path.parent / filename).resolve()
+                try:
+                    referenced_path.relative_to(root)
+                except ValueError:
+                    add_issue(
+                        "file_outside_project_root",
+                        "A relative file reference resolves outside TITAN_PROJECT_ROOT and was not checked.",
+                        filename,
+                    )
+                else:
+                    if not referenced_path.is_file():
+                        add_issue(
+                            "missing_project_file",
+                            "A relative file reference does not resolve to a file inside the project.",
+                            filename,
+                        )
 
     for element in xml_root.iter():
         file_id = element.get("fileId")
@@ -398,6 +423,7 @@ def check_i3d_integrity(relative_path: str, max_issues: int = 100) -> dict[str, 
     return {
         "relative_path": file_path.relative_to(root).as_posix(),
         "valid": issue_count == 0,
+        "local_file_reference_count": local_file_reference_count,
         "issue_count": issue_count,
         "issues": issues,
         "issues_truncated": issue_count > len(issues),
@@ -405,6 +431,7 @@ def check_i3d_integrity(relative_path: str, max_issues: int = 100) -> dict[str, 
             "scene presence",
             "unique scene nodeId values",
             "Files fileId definitions and references",
+            "relativePath=true local file references within the project root",
             "scene Shape shapeId references",
             "scene Shape materialIds references",
         ],
