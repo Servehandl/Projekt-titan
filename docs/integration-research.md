@@ -1,6 +1,6 @@
 # GIANTS-Editor-Integration: Recherche
 
-Stand: 16. November 2026
+Stand: 17. November 2026
 
 ## Offizielle Editor- und Debugger-Wege
 
@@ -13,7 +13,7 @@ Stand: 16. November 2026
 
 Die GDN-Dokumentation beschreibt I3D als XML mit optionalen Abschnitten wie Files, Materials, Shapes und Scene. Im Scenegraph tragen Knoten eine `nodeId`; Dateiverweise werden unter `Files` über `fileId` und `filename` aufgelöst.
 
-Der Prototyp liest deshalb die Scene-Knoten und File-Verweise direkt aus der I3D-Datei. Der zusätzliche Integritätscheck prüft häufige ID-Verweise, ersetzt aber keine vollständige GDN-Schema-Validierung. Die Dateien werden nicht verändert.
+Der Prototyp liest deshalb die Scene-Knoten und File-Verweise direkt aus der I3D-Datei. Der Integritätscheck prüft häufige ID-Verweise. Zusätzlich prüft er Dateien, die in `Files` ausdrücklich mit `relativePath="true"` auf einen lokalen Pfad innerhalb des Projektordners verweisen. `$data`-Referenzen werden übersprungen, weil sie auf Spieldateien außerhalb des Mod-Projektordners zeigen können. Das ersetzt keine vollständige GDN-Schema-Validierung. Die Dateien werden nicht verändert.
 
 ## Schlussfolgerung
 
@@ -25,7 +25,7 @@ PROJECT TITAN startet daher mit lokalen, schreibgeschützten MCP-Werkzeugen für
 
 - MCP-Transport: lokales **stdio**
 - Laufzeit: Python 3.11+
-- Werkzeuge: I3D-Dateien finden, Scene-Knoten und Dateiverweise zusammenfassen, Scene-Knoten projektweit nach Name oder `nodeId` suchen, einzelne Knoten samt XML-Attributen und Hierarchie inspizieren sowie häufige ID-Referenzen prüfen
+- Werkzeuge: I3D-Dateien finden, Scene-Knoten und Dateiverweise zusammenfassen, Scene-Knoten projektweit nach Name oder `nodeId` suchen, einzelne Knoten samt XML-Attributen und Hierarchie inspizieren sowie häufige ID-Referenzen und fehlende lokale Dateien prüfen
 - Schreibzugriffe und Editor-Steuerung: zunächst nicht enthalten
 - Sicherheitsgrenze: angefragte Dateien müssen innerhalb von `TITAN_PROJECT_ROOT` liegen
 
