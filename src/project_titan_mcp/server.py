@@ -302,6 +302,100 @@ def inspect_i3d_node(
 
 
 @mcp.tool()
+def read_editor_selection_snapshot() -> dict[str, Any]:
+    """Read the latest selection snapshot manually exported from GIANTS Editor."""
+    root = _project_root()
+    snapshot_name = ".project-titan-editor-selection.xml"
+    unresolved_path = root / snapshot_name
+    if not unresolved_path.exists():
+        return {
+            "available": False,
+            "snapshot_file": snapshot_name,
+            "message": (
+                "No Editor snapshot exists yet. Run "
+                "scripts/giants_editor/export_selection.lua in GIANTS Editor."
+            ),
+        }
+
+    snapshot_path = unresolved_path.resolve(strict=True)
+    try:
+        snapshot_path.relative_to(root)
+    except ValueError as error:
+        raise ValueError("The Editor snapshot must stay inside TITAN_PROJECT_ROOT.") from error
+
+    if not snapshot_path.is_file():
+        raise ValueError("The Editor snapshot path is not a file.")
+    if snapshot_path.stat().st_size > 1_000_000:
+        raise ValueError("The Editor snapshot is larger than 1 MB.")
+
+    xml_root = ET.parse(snapshot_path).getroot()
+    if xml_root.tag != "projectTitanSelection":
+        raise ValueError("The Editor snapshot has an unexpected XML root element.")
+    if xml_root.get("version") != "1":
+        raise ValueError("The Editor snapshot version is not supported.")
+
+    try:
+        selected_count = int(xml_root.get("selectedCount", "0"))
+        exported_count = int(xml_root.get("exportedCount", "0"))
+    except ValueError as error:
+        raise ValueError("The Editor snapshot contains an invalid selection count.") from error
+
+    nodes: list[dict[str, Any]] = []
+
+    def read_vector(element: ET.Element, attribute: str) -> list[float]:
+        value = (element.get(attribute) or "").split()
+        if len(value) != 3:
+            raise ValueError(f"The Editor snapshot has an invalid {attribute} vector.")
+        try:
+            return [float(component) for component in value]
+        except ValueError as error:
+            raise ValueError(f"The Editor snapshot has an invalid {attribute} vector.") from error
+
+    for element in xml_root.findall("node"):
+        runtime_id_value = element.get("runtimeId")
+        parent_id_value = element.get("parentRuntimeId")
+        child_count_value = element.get("childCount")
+        if runtime_id_value is None or parent_id_value is None or child_count_value is None:
+            raise ValueError("The Editor snapshot contains a node with missing IDs or child count.")
+        try:
+            runtime_id = int(runtime_id_value)
+            parent_runtime_id = int(parent_id_value)
+            child_count = int(child_count_value)
+        except ValueError as error:
+            raise ValueError("The Editor snapshot contains an invalid node ID or child count.") from error
+
+        nodes.append(
+            {
+                "runtime_id": runtime_id,
+                "name": element.get("name", ""),
+                "parent_runtime_id": parent_runtime_id or None,
+                "parent_name": element.get("parentName", ""),
+                "local_translation": read_vector(element, "localTranslation"),
+                "world_translation": read_vector(element, "worldTranslation"),
+                "rotation": read_vector(element, "rotation"),
+                "scale": read_vector(element, "scale"),
+                "child_count": child_count,
+            }
+        )
+
+    if exported_count != len(nodes):
+        raise ValueError("The Editor snapshot node count does not match its contents.")
+
+    return {
+        "available": True,
+        "snapshot_file": snapshot_name,
+        "selected_count": selected_count,
+        "exported_count": exported_count,
+        "truncated": selected_count > exported_count,
+        "nodes": nodes,
+        "note": (
+            "This is a manual snapshot from the last time the Editor helper ran. "
+            "runtime_id is a live Editor handle, not an I3D XML nodeId."
+        ),
+    }
+
+
+@mcp.tool()
 def check_i3d_integrity(relative_path: str, max_issues: int = 100) -> dict[str, Any]:
     """Check common I3D ID references without changing the file or checking the full GDN schema."""
     if max_issues < 1 or max_issues > 500:
